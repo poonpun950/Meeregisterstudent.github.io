@@ -1,4 +1,3 @@
-
 // ===== CONFIG =====
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEmFPXZ4S18jI6QL4Pv8ak_bwLyVcFfaP7A7s9sUXwi3v7pRanso479qlzllY92qRm_w/exec';
 
@@ -634,3 +633,4 @@ function exportData() {
     a.href = url; a.download = 'attendance_export.csv'; a.click();
     showToast('ส่งออกข้อมูลสำเร็จ', 'success');
 }
+
