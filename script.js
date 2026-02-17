@@ -1,3 +1,4 @@
+
 // ===== CONFIG =====
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEmFPXZ4S18jI6QL4Pv8ak_bwLyVcFfaP7A7s9sUXwi3v7pRanso479qlzllY92qRm_w/exec';
 
@@ -149,6 +150,7 @@ function updateDashboard() {
     const today = document.getElementById('checkin-date').value;
     const todayAtt = appData.attendance[today] || [];
 
+    // นับสถิติวันนี้สำหรับ card หน้าหลัก
     let p = 0, l = 0, lv = 0, ab = 0;
     todayAtt.forEach(a => {
         if (a.status === 'present') p++;
@@ -157,17 +159,29 @@ function updateDashboard() {
         else if (a.status === 'absent') ab++;
     });
 
+    // ถ้าวันนี้ไม่มีข้อมูล ให้นับจากทุกวันแทน
+    if (todayAtt.length === 0) {
+        Object.values(appData.attendance).forEach(dayRecs => {
+            dayRecs.forEach(a => {
+                if (a.status === 'present') p++;
+                else if (a.status === 'late') l++;
+                else if (a.status === 'leave') lv++;
+                else if (a.status === 'absent') ab++;
+            });
+        });
+    }
+
     document.getElementById('dash-present').textContent = p;
     document.getElementById('dash-late').textContent = l;
     document.getElementById('dash-leave').textContent = lv;
     document.getElementById('dash-absent').textContent = ab;
 
-    const total = appData.students.length;
     const days = Object.keys(appData.attendance).length;
-    document.getElementById('dash-checkin-days').textContent = days + ' วัน';
+    document.getElementById('dash-checkin-days').textContent = days > 0 ? days + ' วัน' : '—';
 
-    if (todayAtt.length > 0) {
-        const rate = Math.round((p / todayAtt.length) * 100);
+    const total = p + l + lv + ab;
+    if (total > 0) {
+        const rate = Math.round((p / total) * 100);
         document.getElementById('dash-rate').textContent = rate + '%';
     } else {
         document.getElementById('dash-rate').textContent = '—';
