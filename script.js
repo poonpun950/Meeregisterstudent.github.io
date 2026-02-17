@@ -1,6 +1,5 @@
-
 // ===== CONFIG =====
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFmFWzm6cXWEMjxx1NIDMiQfXab4mYq2RVRNq2H_FKPHwHz_WPNPko1uGxnRMIL_OEnA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPvnmsTLl345G4DciA9aJDIEaGuEl9w-RCpZ_M1_E-7EBocVtYk63uLTmtUY6kD-O2sA/exec';
 
 // ===== DATA STORE =====
 let appData = {
@@ -445,21 +444,48 @@ function renderStudentList() {
 }
 
 function deleteStudent(id) {
+    const student = appData.students.find(s => s.id === id);
+    if (!student) return;
+
     Swal.fire({
         title: 'ยืนยันการลบ?',
-        text: 'ข้อมูลนักเรียนจะถูกลบออกจากระบบ',
+        html: `ลบ <b>${student.name}</b><br><small style="color:#94a3b8">ชั้น ${student.class} เลขที่ ${student.number}</small>`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'ลบ',
+        confirmButtonText: '<i class="fas fa-trash"></i> ลบเลย',
         cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#ef4444'
-    }).then(result => {
-        if (result.isConfirmed) {
-            appData.students = appData.students.filter(s => s.id !== id);
-            updateBadge();
-            renderStudentList();
-            showToast('ลบนักเรียนเรียบร้อย', 'success');
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#374151'
+    }).then(async result => {
+        if (!result.isConfirmed) return;
+
+        // แสดง loading ระหว่างรอ
+        Swal.fire({
+            title: 'กำลังลบ...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            // ส่งคำสั่งลบไปยัง Google Sheets
+            await jsonpRequest({ action: 'deleteStudent', id: id });
+        } catch (e) {
+            console.warn('GAS delete failed, removing locally only:', e);
         }
+
+        // ลบออกจาก local data ไม่ว่า GAS จะสำเร็จหรือไม่
+        appData.students = appData.students.filter(s => s.id !== id);
+        updateBadge();
+        renderStudentList();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'ลบเรียบร้อย!',
+            html: `ลบ <b>${student.name}</b> ออกจากระบบแล้ว`,
+            timer: 2000,
+            showConfirmButton: false
+        });
     });
 }
 
