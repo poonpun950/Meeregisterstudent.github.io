@@ -1,5 +1,4 @@
-
-  :root {
+:root {
     --bg-primary: #0f1117;
     --bg-secondary: #161b27;
     --bg-card: #1a2035;
@@ -1032,3 +1031,4 @@
     background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue)) !important;
     border: none !important;
   }
+
